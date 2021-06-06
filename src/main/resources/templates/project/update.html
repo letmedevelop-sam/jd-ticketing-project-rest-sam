@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="/fragments/head :: header"></head>
+
+<body>
+
+<div class="dashboard-main-wrapper">
+
+    <div th:replace="/fragments/header :: header"></div>
+
+    <div th:replace="/fragments/left-sidebar :: left-sidebar"></div>
+
+    <div class="dashboard-wrapper">
+
+        <div class="dashboard-ecommerce">
+
+            <div class="container-fluid dashboard-content">
+
+                <div class="row">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                        <div class="page-header" id="top">
+                            <h2 class="pageheader-title">Project Create</h2>
+                        </div>
+                    </div>
+                </div>
+                <!-- ------------------------FORM START----------------------------- -->
+                <div class="row">
+                    <div class="col-lg-6 col-md-6">
+                        <form class="needs-validation" novalidate th:action="@{/project/update/{id}(id=${project.projectName})}" method="post" th:object="${project}">
+
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 ">
+                                    <div class="form-group">
+                                        <label for="projectname" class="col-form-label">Project Name</label>
+                                        <input id="projectname" type="text" placeholder="project name" th:field="*{projectName}" class="form-control" required>
+                                        <div class="invalid-feedback">Please enter project name.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 ">
+                                    <div class="form-group">
+                                        <label for="projectcode" class="col-form-label">Project Code</label>
+                                        <input id="projectcode" type="text"  placeholder="project code" th:field="*{projectCode}"  class="form-control" readonly required>
+                                        <div class="invalid-feedback">Please enter project code.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 ">
+                                    <div class="form-group">
+                                        <label>Assigned Manager </label> <br>
+                                        <select th:field="*{assignedManager}" class="custom-select" required="required">
+
+                                            <option th:each="manager : ${managers}" th:value="${manager.userName}" th:text="${manager.firstName + ' ' + manager.lastName}"></option>
+                                        </select>
+                                        <div class="invalid-feedback">Please choose manager</div>
+                                        <!--
+                                        <select name="roleid" id="roleid" class="custom-select" required="required">
+                                            <option value="select">Select</option>
+                                            <option value="admin">Admin</option>
+                                            <option value="manager">Manager</option>
+                                            <option value="employee">Employee</option>
+                                        </select>
+                                        -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-sm-3 col-md-3 ">
+                                    <div class="form-group">
+                                        <label>Project Start Date <small class="text-muted"></small></label>
+                                        <input type="date" th:field="*{startDate}"  class="form-control date-inputmask" id="startdate" placeholder="dd-MM-yyyy">
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-3 col-md-3 ">
+                                    <div class="form-group">
+                                        <label>Project End Date <small class="text-muted"></small></label>
+                                        <input type="date" th:field="*{endDate}"  class="form-control date-inputmask" id="enddate" placeholder="dd-MM-yyyy">
+                                    </div>
+                                </div>
+
+
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-sm-12 col-md-12 col-lg-12">
+                                    <div class="form-group">
+                                        <label for="exampleFormControlTextarea1">Project Detail</label>
+                                        <textarea class="form-control" th:field="*{projectDetail}" id="exampleFormControlTextarea1" rows="2" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-6 col-md-6 col-lg-12">
+                                    <div class="float-right">
+                                        <button class="btn btn-success" type="submit">Save</button>
+                                        <!-- When we click on Save button => @PostMapping("/create") will run in our ProjectController class -->
+
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+
+                    </div>
+
+                    <div class="col-sm-12 col-md-12 ">
+                        <div class="row">
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <div class="page-header" id="top2">
+                                    <h2 class="pageheader-title">Project List</h2>
+                                </div>
+                            </div>
+
+
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <div class="card">
+
+
+                                    <table class="table table-striped">
+                                        <thead>
+                                        <tr>
+                                            <!-- <th scope="col">#</th>  -->
+                                            <th scope="col">Project Code</th>
+                                            <th scope="col">Project Name</th>
+                                            <th scope="col">Start / End Date</th>
+                                            <th scope="col">Manager</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+
+                                        <tr th:each="project : ${projects}">
+                                            <!-- <td th:value="${projects.indexOf(project)}" ></td> -->
+                                            <td th:text="${project.projectCode}"></td>
+                                            <td th:text="${project.projectName}"></td>
+                                            <td th:text="${#temporals.format(project.startDate,'MM.dd.yyyy') + ' - ' + #temporals.format(project.endDate,'MM.dd.yyyy')}"></td>
+                                            <!-- to change the date format in our Project List table, we need to add --${#temporals.format(project.startDate,'MM.dd.yyyy')-- -->
+
+                                            <td th:text="${project.assignedManager.firstName + ' ' + project.assignedManager.lastName}"></td>
+                                            <td th:text="${project.projectStatus}"></td>
+                                            <td class="actions">
+                                                <a th:href="@{/project/update/{id}(id=${project.getProjectCode()})}" class="btn btn-primary btn-sm">Update</button></i></a>
+                                                <a th:href="@{/project/delete/{id}(id=${project.getProjectCode()})}" class="delete-row"><button type="button" class="btn btn-secondary btn-sm">Delete</button> </a>
+                                                <a th:href="@{/project/complete/{id}(id=${project.getProjectCode()})}"class="complete-row"><button type="button" class="btn btn-dark btn-sm">Complete</button> </a>
+                                            </td>
+                                        </tr>
+
+
+                                    </table>
+
+
+
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                </div>
+
+                <!-- ------------------------TABLE END----------------------------- -->
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div th:replace="/fragments/footer :: footer"></div>
+
+</div>
+
+<div th:replace="/fragments/javascript :: js"></div>
+
+</body>
+
+</html>
