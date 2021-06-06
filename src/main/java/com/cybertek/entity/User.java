@@ -21,14 +21,14 @@ public class User extends BaseEntity {
     private String firstName;
     private String lastName;
     private String userName;
-//    private String passWord;
-    private boolean enabled;
+    private String passWord;
+    private boolean enabled;    //We did not need it while it was coming from DB
     private String phone;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne      //we deleted         (fetch = FetchType.LAZY)  it will come EAGER as default
     @JoinColumn(name = "role_id")
     private Role role;
 
