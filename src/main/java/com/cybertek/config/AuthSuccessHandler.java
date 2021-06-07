@@ -19,7 +19,7 @@ public class AuthSuccessHandler implements AuthenticationSuccessHandler {
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
 
         //We need to get roles. Then we will arrange the custom landing pages in accordance with the roles
-        Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities()); //authentication.getAuthorities() coming from UsrePrincipal
+        Set<String> roles = AuthorityUtils.authorityListToSet(authentication.getAuthorities()); //authentication.getAuthorities() coming from UserPrincipal
 
         if(roles.contains("Admin")){
             httpServletResponse.sendRedirect("/user/create");

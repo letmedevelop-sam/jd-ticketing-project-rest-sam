@@ -29,8 +29,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http
                 .authorizeRequests()
+//                to set landing page for each user
+                .antMatchers("/user/**").hasAuthority("Admin")
+                .antMatchers("/project/**").hasAuthority("Manager")
+                .antMatchers("/task/employee/**").hasAuthority("Employee")
+                .antMatchers("/task/**").hasAuthority("Manager")
 
-                //First provide public ACCESS
+                //Then provide public ACCESS
                 .antMatchers(
                             "/",          //everyone can have access after localhost:8080
                             "/login",              //everyone can have access to login
@@ -44,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin()
                     .loginPage("/login")
   //                  .defaultSuccessUrl("/welcome")        //we dont want every user to start with welcome. We want them to start with their page
-                    .successHandler(autSuccessHAndler)               //we added this file to direct each user to the respective page
+                    .successHandler(authSuccessHandler)               //we added this file to direct each user to the respective page
                     .failureUrl("/login?error=true")
                     .permitAll()
 
