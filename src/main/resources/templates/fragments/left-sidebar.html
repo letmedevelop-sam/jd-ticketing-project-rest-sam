@@ -20,6 +20,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav flex-column">
             <li class="nav-divider"></li>
+<!--                  only admin and manager will have access to this menu-->
             <li class="nav-item" sec:authorize="hasAnyAuthority('Admin', 'Manager')" >
               <a class="nav-link active"
                  href="#"
@@ -33,11 +34,13 @@
               </a>
               <div id="submenu-1" class="collapse submenu" style="">
                 <ul class="nav flex-column">
+ <!--                  only admin will have access to this menu-->
                   <li class="nav-item" sec:authorize="hasAuthority('Admin')">
                     <a class="nav-link" th:href="@{/user/create}"
                     >User Create</a
                     >
                   </li>
+<!--                  only manager will have access to this menu-->
                   <li class="nav-item" sec:authorize="hasAuthority('Manager')">
                     <a class="nav-link" th:href="@{/project/create}"
                     >Project Create</a
@@ -46,6 +49,7 @@
                 </ul>
               </div>
             </li>
+            <!--                  only manager will have access to this menu-->
             <li class="nav-item" sec:authorize="hasAuthority('Manager')">
               <a
                       class="nav-link"
