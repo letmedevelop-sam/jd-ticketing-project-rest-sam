@@ -17,10 +17,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private SecurityService securityService;
     private AuthSuccessHandler authSuccessHandler;
 
-    public SecurityConfig(SecurityService securityService){
+    public SecurityConfig(SecurityService securityService, AuthSuccessHandler authSuccessHandler){
         this.securityService = securityService;
         this.authSuccessHandler = authSuccessHandler;
     }
+
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -65,8 +66,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .tokenValiditySeconds(120)
                     .key("cybertekSecret")
                 .userDetailsService(securityService);
-
-
 
     }
 }

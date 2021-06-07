@@ -12,6 +12,7 @@ import com.cybertek.service.ProjectService;
 import com.cybertek.service.TaskService;
 import com.cybertek.service.UserService;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -104,8 +105,13 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public List<ProjectDTO> listAllProjectDetails() {
-        //next line will be gone by we learn SECURITY
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        UserDTO currentUserDTO = userService.findByUserName(username); // username will be used instead of manually given username "samikaratas2000@gmail.com"
+/*
+        //next line will be gone by we learn SECURITY. It is replaced by the previous one
         UserDTO currentUserDTO = userService.findByUserName("samikaratas2000@gmail.com");
+*/
 
         User user = userMapper.convertToEntity(currentUserDTO);
 
