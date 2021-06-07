@@ -80,6 +80,11 @@ public class UserServiceImpl implements UserService {
         //Map update user DTO to ENTITY object
         User convertedUser = userMapper.convertToEntity(dto); // This is updated one but again there is no ID because dto has no ID
 
+        //After update password is not encrypted
+        convertedUser.setPassWord(passwordEncoder.encode(convertedUser.getPassWord())); //now password is encoded
+
+        convertedUser.setEnabled(true);
+
         //set ID to the converted object
         convertedUser.setId(user.getId());
 
