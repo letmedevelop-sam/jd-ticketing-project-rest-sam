@@ -28,7 +28,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @ManyToOne      //we deleted         (fetch = FetchType.LAZY)  it will come EAGER as default
+    @ManyToOne                   //we deleted         (fetch = FetchType.LAZY)  it will come EAGER as default
     @JoinColumn(name = "role_id")
     private Role role;
 

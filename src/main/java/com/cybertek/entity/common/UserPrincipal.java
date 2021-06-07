@@ -11,7 +11,7 @@ import java.util.List;
 
 public class UserPrincipal implements UserDetails {
 
-    private User user;
+    private User user;      //This is not injection.
 
     public UserPrincipal(User user) {
         this.user = user;
@@ -20,12 +20,14 @@ public class UserPrincipal implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        List<GrantedAuthority> authorityList = new ArrayList<>();
+        List<GrantedAuthority> authorityList = new ArrayList<>();   //We will have more than one Authority
 
+        //we have one to one
+        //we are converting to a form spring will understand
         GrantedAuthority authority = new SimpleGrantedAuthority(this.user.getRole().getDescription());
         authorityList.add(authority);
 
-//         ManyToMany
+//         ManyToMany           This one is very common
 //        this.user.getRoles().forEach(role ->{
 //            GrantedAuthority authority = new SimpleGrantedAuthority(this.user.getRole().getDescription());
 //            authorityList.add(authority);
@@ -64,6 +66,7 @@ public class UserPrincipal implements UserDetails {
         return this.user.isEnabled();
     }
 
+//
     public Long getId(){
         return this.user.getId();
     }

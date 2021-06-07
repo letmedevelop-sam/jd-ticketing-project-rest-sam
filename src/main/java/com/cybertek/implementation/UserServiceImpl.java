@@ -12,6 +12,7 @@ import com.cybertek.service.TaskService;
 import com.cybertek.service.UserService;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,16 +21,18 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    UserRepository userRepository;
-    UserMapper userMapper;
-    ProjectService projectService;
-    TaskService taskService;
+    private UserRepository userRepository;
+    private UserMapper userMapper;
+    private ProjectService projectService;
+    private TaskService taskService;
+    private PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, @Lazy ProjectService projectService, TaskService taskService) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, @Lazy ProjectService projectService, TaskService taskService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.projectService = projectService;
         this.taskService = taskService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -54,8 +57,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public void save(UserDTO dto) {
 
+        //We set the user as enabled before we save it
+        //If there is an email confirmation etc it will stay disabled
+        User foundUser = userRepository.findByUserName(dto.getUserName());
+        dto.setEnabled(true);
+
         //need to convert DTO to ENTITY
         User obj = userMapper.convertToEntity(dto);
+
+        //we will encode the password before we save
+        obj.setPassWord(passwordEncoder.encode(obj.getPassWord()));
         userRepository.save(obj);
     }
 

@@ -22,6 +22,12 @@ public class Role extends BaseEntity {
 
     private String description;
 
+/*
+We can delete this part
+From User side we have @ManyToOne relationship
+
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)  //We dont need cascade, because roles are already loaded before user is created
     private List<User> users = new ArrayList<>();
+
+ */
 }
