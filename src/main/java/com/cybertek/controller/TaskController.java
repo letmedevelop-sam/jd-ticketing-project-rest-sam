@@ -37,7 +37,10 @@ public class TaskController {
     public String createTask(Model model){
 
         model.addAttribute("task",new TaskDTO());
-        model.addAttribute("projects",projectService.listAllProjects());
+
+        model.addAttribute("projects",projectService.listAllNonCompletedProjects());//We dont want to see COMPLETED projects
+
+//        model.addAttribute("projects",projectService.listAllProjects());//We dont want to see COMPLETED projects
         model.addAttribute("employees",userService.listAllByRole("employee"));
         model.addAttribute("tasks",taskService.listAllTasks());
 
@@ -62,7 +65,8 @@ public class TaskController {
     public String editTask(@PathVariable("id") Long id,Model model){
 
         model.addAttribute("task",taskService.findByID(id));
-        model.addAttribute("projects",projectService.listAllProjects());
+       model.addAttribute("projects", projectService.listAllNonCompletedProjects()); //We dont want to see COMPLETED projects
+//        model.addAttribute("projects",projectService.listAllProjects());  //We dont want to see COMPLETED projects
         model.addAttribute("employees",userService.listAllByRole("employee"));
         model.addAttribute("tasks",taskService.listAllTasks());
 
@@ -96,7 +100,10 @@ public class TaskController {
 
         model.addAttribute("task",task);
         model.addAttribute("users",userService.listAllByRole("employee"));
-        model.addAttribute("projects",projectService.listAllProjects());
+
+        model.addAttribute("projects",projectService.listAllNonCompletedProjects());//We dont want to see COMPLETED projects
+//        model.addAttribute("projects",projectService.listAllProjects());//We dont want to see COMPLETED projects
+
         model.addAttribute("tasks",tasks);                                  //show in table
         model.addAttribute("statuses",Status.values());                 //show values to select one
 
