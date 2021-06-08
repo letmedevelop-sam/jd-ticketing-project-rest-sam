@@ -119,11 +119,28 @@
                                             <div class="col-sm-6 col-md-6 ">
                                                 <div class="form-group">
                                                     <label>Choose a Role : </label> <br>
-                                                    <select  th:field="*{role}" class="custom-select" required="required">
+
+                                                    <select  name="role" class="custom-select" required="required">
                                                         <!-- we dont want to see Select while we update our form-->
-                                                        <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.description}"
-                                                        th:selected="${role.id} == ${user.role.id}"></option> <!-- th:value is important. it will give ERROR unless you add it-->
+                                                        <option
+                                                                th:each="r : ${roles}"
+                                                                th:value="${r.id}"
+                                                                th:text="${r.description}"
+                                                                th:selected="${r.id} == *{role.id}">
+
+                                                        </option> <!-- th:value is important. it will give ERROR unless you add it-->
                                                     </select>
+
+<!--                                                    <select  th:field="*{role}" class="custom-select" required="required">-->
+<!--                                                        &lt;!&ndash; we dont want to see Select while we update our form&ndash;&gt;-->
+<!--                                                        <option-->
+<!--                                                                th:each="role : ${roles}"-->
+<!--                                                                th:value="${role.id}"-->
+<!--                                                                th:text="${role.description}"-->
+<!--                                                                th:selected="${role.id} == ${user.role.id}">-->
+<!--                                                            -->
+<!--                                                        </option> &lt;!&ndash; th:value is important. it will give ERROR unless you add it&ndash;&gt;-->
+<!--                                                    </select>-->
                                                         <!--
                                                         <select name="roleid" id="roleid" class="custom-select" required="required">
 
