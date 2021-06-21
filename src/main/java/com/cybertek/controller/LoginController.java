@@ -9,6 +9,7 @@ import com.cybertek.service.UserService;
 import com.cybertek.util.JWTUtil;
 import com.cybertek.util.MapperUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.file.AccessDeniedException;
 
 @RestController
+@Tag(name="Authrntication Controller", description = "Authenticate API")
 public class LoginController {
 
 	private AuthenticationManager authenticationManager;
