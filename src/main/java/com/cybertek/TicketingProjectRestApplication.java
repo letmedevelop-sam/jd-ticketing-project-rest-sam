@@ -8,10 +8,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 //Container will handle bean staff
 @SpringBootApplication  //@SpringBootApplication covers @ComponentScan - @Configuration  - @EnableAutoConfiguration
-public class TicketingProjectSecurityApplication {
+public class TicketingProjectRestApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TicketingProjectSecurityApplication.class, args);
+		SpringApplication.run(TicketingProjectRestApplication.class, args);
 	}
 
 	@Bean			//@SpringBootApplication covers @ComponentScan - @Configuration  - @EnableAutoConfiguration
