@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public String insertUser(UserDTO user,Model model){  //this will activate SAVE button //We used UserDTO because after SAVE we want to see default placeholders//We need Model because we want to create new object
+    public String insertUser(UserDTO user,Model model) throws TicketingProjectException {  //this will activate SAVE button //We used UserDTO because after SAVE we want to see default placeholders//We need Model because we want to create new object
         userService.save(user);   //save will come from Service but we need to  implement it
         return "redirect:/user/create"; //we will again see the same page but with a new line added to our list and default place holders in all input boxes
         //instead of going to create.htlm how about if we call the createuser method?

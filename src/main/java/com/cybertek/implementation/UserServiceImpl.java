@@ -5,11 +5,12 @@ import com.cybertek.dto.TaskDTO;
 import com.cybertek.dto.UserDTO;
 import com.cybertek.entity.User;
 import com.cybertek.exception.TicketingProjectException;
-import com.cybertek.mapper.UserMapper;
+
 import com.cybertek.repository.UserRepository;
 import com.cybertek.service.ProjectService;
 import com.cybertek.service.TaskService;
 import com.cybertek.service.UserService;
+import com.cybertek.util.MapperUtil;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,16 +23,16 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
-    private UserMapper userMapper;
     private ProjectService projectService;
     private TaskService taskService;
+    private MapperUtil mapperUtil;
     private PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, @Lazy ProjectService projectService, TaskService taskService, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, @Lazy ProjectService projectService, TaskService taskService, MapperUtil mapperUtil, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
         this.projectService = projectService;
         this.taskService = taskService;
+        this.mapperUtil = mapperUtil;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -39,9 +40,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> listAllUsers() {
         List<User> list = userRepository.findAll(Sort.by("firstName"));
 
-        //convert to DTO  //create a  new mapper class
-
-        return list.stream().map(obj ->{return userMapper.convertToDto(obj);}).collect(Collectors.toList());
+        return list.stream().map(obj -> mapperUtil.convert(obj, new UserDTO())).collect(Collectors.toList());
     }
 
     @Override
@@ -51,23 +50,25 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUserName(username);  //this findByUserName will be called from UserRepository
 
         //Convert the data which came as ENTITY to DTO
-        return userMapper.convertToDto(user);
+        return mapperUtil.convert(user, new UserDTO());
     }
 
     @Override
-    public void save(UserDTO dto) {
+    public UserDTO save(UserDTO dto) throws TicketingProjectException {
 
-        //We set the user as enabled before we save it
-        //If there is an email confirmation etc it will stay disabled
         User foundUser = userRepository.findByUserName(dto.getUserName());
-        dto.setEnabled(true);
 
-        //need to convert DTO to ENTITY
-        User obj = userMapper.convertToEntity(dto);
+        if(foundUser!=null){
+            throw new TicketingProjectException("User already exists");
+        }
 
+        User user =  mapperUtil.convert(dto,new User());
         //we will encode the password before we save
-        obj.setPassWord(passwordEncoder.encode(obj.getPassWord()));
-        userRepository.save(obj);
+        user.setPassWord(passwordEncoder.encode(user.getPassWord()));
+
+        User save = userRepository.save(user);
+
+    return mapperUtil.convert(save,new UserDTO());
     }
 
     //UPDATE
@@ -78,7 +79,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUserName(dto.getUserName()); //We dont know the ID. We will bring it from DTO
 
         //Map update user DTO to ENTITY object
-        User convertedUser = userMapper.convertToEntity(dto); // This is updated one but again there is no ID because dto has no ID
+        User convertedUser = mapperUtil.convert(user, new User()); // This is updated one but again there is no ID because dto has no ID
 
         //After update password is not encrypted
         convertedUser.setPassWord(passwordEncoder.encode(convertedUser.getPassWord())); //now password is encoded
@@ -126,10 +127,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDTO> listAllByRole(String role) {
-
         List<User> users = userRepository.findAllByRoleDescriptionIgnoreCase(role);
-
-        return users.stream().map(obj -> {return  userMapper.convertToDto(obj);}).collect(Collectors.toList());
+        return users.stream().map(obj -> {return mapperUtil.convert(obj,new UserDTO());}).collect(Collectors.toList());
     }
 
     @Override
@@ -145,6 +144,14 @@ public class UserServiceImpl implements UserService {
             default:
                 return true;
         }
+    }
+
+    @Override
+    public UserDTO confirm(User user) {
+        user.setEnabled(true);
+        User confirmedUser = userRepository.save(user);
+
+        return mapperUtil.convert(confirmedUser, new UserDTO());
     }
 
 }

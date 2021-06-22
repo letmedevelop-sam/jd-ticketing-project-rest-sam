@@ -11,7 +11,7 @@ public interface UserService {
     List<UserDTO> listAllUsers();
     UserDTO findByUserName(String username);
 
-    void save(UserDTO dto);
+    UserDTO save(UserDTO dto) throws TicketingProjectException;
 
     UserDTO update (UserDTO dto);
 
@@ -24,6 +24,5 @@ public interface UserService {
     Boolean checkIfUserCanBeDeleted(User user);
 
 
-
-
+    UserDTO confirm(User user);
 }
