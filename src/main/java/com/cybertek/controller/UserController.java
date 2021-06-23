@@ -1,65 +1,111 @@
 package com.cybertek.controller;
 
+import com.cybertek.annotation.DefaultExceptionMessage;
+import com.cybertek.dto.MailDTO;
 import com.cybertek.dto.UserDTO;
+import com.cybertek.entity.ConfirmationToken;
+import com.cybertek.entity.ResponseWrapper;
+import com.cybertek.entity.User;
 import com.cybertek.exception.TicketingProjectException;
+import com.cybertek.service.ConfirmationTokenService;
 import com.cybertek.service.RoleService;
 import com.cybertek.service.UserService;
+import com.cybertek.util.MapperUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/user")
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/user")
+@Tag(name="User Controller", description = "User API")
+
 public class UserController {
+    private String BASE_URL;
 
-    @Autowired
-    RoleService roleService;   // DI by Field Injection to create a role  list to use in the dropdown
-    @Autowired
-    UserService userService; // DI by Field Injection to create a users list to use in the table to print them in th:each
+    private UserService userService;
+    private MapperUtil mapperUtil;
+    private RoleService roleService;
+    private ConfirmationTokenService confirmationTokenService;
 
-    @GetMapping("/create")
-    public String createUser(Model model){ //to be able to save when we enter a data: We need tot send an empty object
-
-        model.addAttribute("user",new UserDTO());  //We used DTO because
-        model.addAttribute("roles",roleService.listAllRoles()); //we used roles in dropdown // we need dependency injection FIELD INJECTION
-        model.addAttribute("users",userService.listAllUsers()); // we used users in table to print all users // we need DI by Field Injection
-
-        return "/user/create";
+    public UserController(UserService userService, MapperUtil mapperUtil, RoleService roleService, ConfirmationTokenService confirmationTokenService) {
+        this.userService = userService;
+        this.mapperUtil = mapperUtil;
+        this.roleService = roleService;
+        this.confirmationTokenService = confirmationTokenService;
     }
 
-    @PostMapping("/create")
-    public String insertUser(UserDTO user,Model model) throws TicketingProjectException {  //this will activate SAVE button //We used UserDTO because after SAVE we want to see default placeholders//We need Model because we want to create new object
-        userService.save(user);   //save will come from Service but we need to  implement it
-        return "redirect:/user/create"; //we will again see the same page but with a new line added to our list and default place holders in all input boxes
-        //instead of going to create.htlm how about if we call the createuser method?
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong, try again!")
+    @PostMapping("/create-user")
+    @Operation(summary = "Create new account")
+    @PreAuthorize("hasAuthority('Admin')")
+
+    public ResponseEntity<ResponseWrapper> doRegister(@RequestBody UserDTO userDTO) throws TicketingProjectException{
+
+        UserDTO createdUser = userService.save(userDTO);
+
+        sendEmail(createEmail(createdUser));
+
+        return ResponseEntity.ok(new ResponseWrapper("User has been created!", createdUser));
     }
 
-    //project ORM part2 recording
-    @GetMapping("/update/{username}")  //use get mapping because we will add some data // we will use username path variable
-    public String editUser(@PathVariable("username") String username, Model model){
+    @GetMapping
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong, try again!")
+    @Operation(summary = "Read All Users")
+    @PreAuthorize("hasAuthority('Admin')")
+    public ResponseEntity<ResponseWrapper>readAll(){
 
-        model.addAttribute("user",userService.findByUserName(username)); //repository will bring it // 1. write service 2. implementation 3. controller
-        model.addAttribute("users",userService.listAllUsers());
-        model.addAttribute("roles",roleService.listAllRoles()); //this will bring the roles to the dropdown in UI
+        //business logic - bring the data
+        //bind it to API
 
-        return "/user/update";
+        List<UserDTO> result = userService.listAllUsers();
+        return ResponseEntity.ok(new ResponseWrapper("Successfully Retrieved Users", result));
+
 
     }
 
-    @PostMapping("/update/{username}")
-    public String updateUser(@PathVariable("username") String username,UserDTO user,Model model){
-        userService.update(user);
-        return "redirect:/user/create";
+
+
+
+
+
+
+
+
+
+    private MailDTO createEmail(UserDTO userDTO) {
+
+        User user = mapperUtil.convert(userDTO, new User());
+
+        ConfirmationToken confirmationToken = new ConfirmationToken(user);
+        confirmationToken.setIsDeleted(false);
+
+        ConfirmationToken createdConfirmationToken = confirmationTokenService.save(confirmationToken);
+
+        return MailDTO
+                .builder()
+                .emailTo(user.getUserName())
+                .token(createdConfirmationToken.getToken())
+                .subject("Confirm Registration")
+                .message("To confirm your account, please click here : ")
+                .url(BASE_URL + "/confirmation?token=")
+                .build();
     }
 
-    @GetMapping("/delete/{username}")
-    public String deleteUser(@PathVariable("username") String username) throws TicketingProjectException {
-        userService.delete(username);
-        return "redirect:/user/create";
-    }
+    private void sendEmail(MailDTO mailDTO){
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(mailDTO.getEmailTo());
+        mailMessage.setSubject(mailDTO.getSubject());
+        mailMessage.setText(mailDTO.getMessage() + mailDTO.getUrl() + mailDTO.getToken() );
 
+        confirmationTokenService.sendEmail(mailMessage);
+
+    }
 }

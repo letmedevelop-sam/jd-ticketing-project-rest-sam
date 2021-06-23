@@ -67,6 +67,12 @@ public class LoginController {
 
 		return ResponseEntity.ok(new ResponseWrapper("Login Successful",jwtToken));
 	}
+
+/*
+//we dont want everyone has this authority
+//so we deleted "/create-user",  line from WebSecurityConfig class
+//we will cut create-user and move it to UcerController class
+
 	@DefaultExceptionMessage(defaultMessage = "Something went wrong, try again!")
 	@PostMapping("/create-user")
 	@Operation(summary = "Create new account")
@@ -78,7 +84,7 @@ public class LoginController {
 
 		return ResponseEntity.ok(new ResponseWrapper("User has been created!", createdUser));
 	}
-
+*/
 	@DefaultExceptionMessage(defaultMessage = "Failed to confirm email, please try again!")
 	@GetMapping("/confirmation")
 	@Operation(summary = "Confirm account")
@@ -92,6 +98,9 @@ public class LoginController {
 
 	}
 
+/*
+//WE WIL MOVE createEmail and sendEmail to UserController  ********************
+//***********************************
 	private MailDTO createEmail(UserDTO userDTO) {
 
 		User user = mapperUtil.convert(userDTO, new User());
@@ -109,9 +118,8 @@ public class LoginController {
 				.message("To confirm your account, please click here : ")
 				.url(BASE_URL + "/confirmation?token=")
 				.build();
-
 	}
-
+//***********************************
 	private void sendEmail(MailDTO mailDTO){
 		SimpleMailMessage mailMessage = new SimpleMailMessage();
 		mailMessage.setTo(mailDTO.getEmailTo());
@@ -121,8 +129,8 @@ public class LoginController {
 		confirmationTokenService.sendEmail(mailMessage);
 
 	}
-
-
+//***********************************
+*/
 
 
 }
