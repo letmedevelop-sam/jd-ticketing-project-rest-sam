@@ -73,10 +73,15 @@ public class UserServiceImpl implements UserService {
 
     //UPDATE
     @Override
-    public UserDTO update(UserDTO dto) { //This dto will be the updated one
+    public UserDTO update(UserDTO dto) throws TicketingProjectException { //This dto will be the updated one
 
         //Find the current user  // THIS user is NOT UPDATED yet
         User user = userRepository.findByUserName(dto.getUserName()); //We dont know the ID. We will bring it from DTO
+
+            //add exception
+        if(user == null){
+            throw new TicketingProjectException("User Does Not Exist");
+        }
 
         //Map update user DTO to ENTITY object
         User convertedUser = mapperUtil.convert(user, new User()); // This is updated one but again there is no ID because dto has no ID

@@ -13,7 +13,7 @@ public interface UserService {
 
     UserDTO save(UserDTO dto) throws TicketingProjectException;
 
-    UserDTO update (UserDTO dto);
+    UserDTO update (UserDTO dto) throws TicketingProjectException;
 
     void  delete(String username) throws TicketingProjectException;
 

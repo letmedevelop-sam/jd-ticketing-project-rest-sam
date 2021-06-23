@@ -67,13 +67,47 @@ public class UserController {
 
         List<UserDTO> result = userService.listAllUsers();
         return ResponseEntity.ok(new ResponseWrapper("Successfully Retrieved Users", result));
+    }
+    @GetMapping("/{username}")
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong, try again!")
+    @Operation(summary = "Read All Users")
+    //only admin should see other  profiles or current user can see her/his profile
+    public ResponseEntity<ResponseWrapper> readByUsername(@PathVariable("username") String username){
 
+        UserDTO user = userService.findByUserName(username);
+
+        return ResponseEntity.ok(new ResponseWrapper("Successfully retrieved user", user));
 
     }
 
+    @PutMapping
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong, try again!")
+    @Operation(summary = "Update User")
+
+    public ResponseEntity<ResponseWrapper>updateUser(@RequestBody UserDTO user) throws TicketingProjectException {
+
+        UserDTO updatedUser = userService.update(user);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully updated", updatedUser));
+    }
 
 
+    @DeleteMapping("/{username}")
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong, try again!")
+    @Operation(summary = "Delete User")
+    @PreAuthorize("hasAuthority('Admin')")
+    public ResponseEntity<ResponseWrapper> deleteUser(@PathVariable("username") String username) throws TicketingProjectException {
+        userService.delete(username);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully deleted"));
+    }
 
+    @GetMapping("/role")
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong, try again!")
+    @Operation(summary = "Read by role")
+    @PreAuthorize("hasAnyAuthority('Admin','Manager')")
+    public ResponseEntity<ResponseWrapper> readByRole(@RequestParam String role){
+        List<UserDTO> userList = userService.listAllByRole(role);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully read users by role",userList));
+    }
 
 
 
