@@ -2,9 +2,11 @@ package com.cybertek.implementation;
 
 import com.cybertek.dto.RoleDTO;
 import com.cybertek.entity.Role;
+import com.cybertek.exception.TicketingProjectException;
 import com.cybertek.mapper.RoleMapper;
 import com.cybertek.repository.RoleRepository;
 import com.cybertek.service.RoleService;
+import com.cybertek.util.MapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,12 +18,14 @@ public class RoleServiceImpl implements RoleService {
 
 
     private RoleRepository roleRepository;
-    private RoleMapper roleMapper;
+    private MapperUtil mapperUtil;
 
     //create constructor to inject
-    public RoleServiceImpl(RoleRepository roleRepository, RoleMapper roleMapper) {
+
+
+    public RoleServiceImpl(RoleRepository roleRepository, MapperUtil mapperUtil) {
         this.roleRepository = roleRepository;
-        this.roleMapper = roleMapper;
+        this.mapperUtil = mapperUtil;
     }
 
     @Override
@@ -33,12 +37,13 @@ public class RoleServiceImpl implements RoleService {
         //we can do it with setter
         //we can use ready methods //they will come from Role mapper
 
-        return list.stream().map(obj->{return roleMapper.convertToDto(obj);}).collect(Collectors.toList());
+        return list.stream().map(obj->mapperUtil.convert(obj, new RoleDTO())).collect(Collectors.toList());
     }
 
+
     @Override
-    public RoleDTO findById(Long id) {
-        Role role = roleRepository.findById(id).get();
-        return roleMapper.convertToDto(role);
+    public RoleDTO findById(Long id) throws TicketingProjectException {
+        Role role = roleRepository.findById(id).orElseThrow(() -> new TicketingProjectException("Role does not exists"));
+        return mapperUtil.convert(role,new RoleDTO());
     }
 }
