@@ -1,129 +1,126 @@
 package com.cybertek.controller;
 
+import com.cybertek.annotation.DefaultExceptionMessage;
 import com.cybertek.dto.TaskDTO;
+import com.cybertek.entity.ResponseWrapper;
 import com.cybertek.enums.Status;
+import com.cybertek.exception.TicketingProjectException;
 import com.cybertek.service.ProjectService;
 import com.cybertek.service.TaskService;
 import com.cybertek.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-@Controller
-@RequestMapping("/task")
+@RestController
+@RequestMapping("/api/v1/task")
+@Tag(name = "Task Controller",description = "Task API")
 public class TaskController {
 
-    TaskService taskService;
-    ProjectService projectService;
-    UserService userService;
+    private TaskService taskService;
 
-    public TaskController(TaskService taskService, ProjectService projectService, UserService userService) {
+    public TaskController(TaskService taskService) {
         this.taskService = taskService;
-        this.projectService = projectService;
-        this.userService = userService;
     }
 
 
+    //******************   Read all tasks  ***********
+    @GetMapping
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong, please try again!")
+    @Operation(summary = "Read all tasks")
+    @PreAuthorize("hasAuthority('Manager')")
 
-    @GetMapping("/create")
-    public String createTask(Model model){
-
-        model.addAttribute("task",new TaskDTO());
-
-        model.addAttribute("projects",projectService.listAllNonCompletedProjects());//We dont want to see COMPLETED projects
-
-//        model.addAttribute("projects",projectService.listAllProjects());//We dont want to see COMPLETED projects
-        model.addAttribute("employees",userService.listAllByRole("employee"));
-        model.addAttribute("tasks",taskService.listAllTasks());
-
-        return "/task/create";
+    public ResponseEntity<ResponseWrapper> readAll(){
+        return ResponseEntity.ok(new ResponseWrapper("Successfully retrieved all tasks", taskService.listAllTasks()));
     }
 
-    @PostMapping("/create")
-    public String insertTask(Model model,TaskDTO task){
 
-        taskService.save(task);
+    //******************  Read all tasks by project manager  ********************
+    @GetMapping("/project-manager") //no need to add path variable. Spring security is
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong,please try again!")
+    @Operation(summary = "Read all tasks by project manager")
+    @PreAuthorize("hasAuthority('Manager')")
 
-        return "redirect:/task/create";
+    public ResponseEntity<ResponseWrapper> readAllByProjectManager() throws TicketingProjectException {
+
+        List<TaskDTO> taskList = taskService.listAllTasksByProjectManager();
+        return ResponseEntity.ok(new ResponseWrapper("Successfully retrieved tasks by project manager", taskList));
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteTask(@PathVariable("id") Long id){
+
+    //******************  Read task by id   ********************
+    @GetMapping("/{id}")
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong,please try again!")
+    @Operation(summary = "Read task by id")
+    @PreAuthorize("hasAnyAuthority('Manager','Employee')")  //Manager has authority but also Employee should be able to update
+
+    public ResponseEntity<ResponseWrapper> readById(@PathVariable("id") Long id) throws TicketingProjectException {
+        TaskDTO currentTask = taskService.findById(id);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully retrieved task",currentTask));
+    }
+
+    //******************  Create a new task  ********************
+    @PostMapping
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong,please try again!")
+    @Operation(summary = "Create a new task")
+    @PreAuthorize("hasAuthority('Manager')")
+
+    public ResponseEntity<ResponseWrapper> create(@RequestBody TaskDTO task){
+
+        TaskDTO createdTask = taskService.save(task);
+
+        return ResponseEntity.ok(new ResponseWrapper("Successfully task created",createdTask));
+    }
+
+    //****************** Delete a task  ********************
+    @DeleteMapping("/{id}")
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong,please try again!")
+    @Operation(summary = "Delete a task")
+    @PreAuthorize("hasAuthority('Manager')")
+
+    public ResponseEntity<ResponseWrapper> delete(@PathVariable("id") Long id) throws TicketingProjectException {
         taskService.delete(id);
-        return "redirect:/task/create";
+        return ResponseEntity.ok(new ResponseWrapper("Successfully deleted"));
     }
 
-    @GetMapping("/update/{id}")
-    public String editTask(@PathVariable("id") Long id,Model model){
+   //****************** Update task  ********************
+    @PutMapping
+    @DefaultExceptionMessage(defaultMessage = "Something went wrong,please try again!")
+    @Operation(summary = "Update task")
+    @PreAuthorize("hasAuthority('Manager')")
 
-        model.addAttribute("task",taskService.findByID(id));
-       model.addAttribute("projects", projectService.listAllNonCompletedProjects()); //We dont want to see COMPLETED projects
-//        model.addAttribute("projects",projectService.listAllProjects());  //We dont want to see COMPLETED projects
-        model.addAttribute("employees",userService.listAllByRole("employee"));
-        model.addAttribute("tasks",taskService.listAllTasks());
-
-        return "task/update";
-    }
-
-    @PostMapping("/update/{id}")
-    public String updateTask(TaskDTO task){
-
-        taskService.update(task);
-
-        return "redirect:/task/create";
+    public ResponseEntity<ResponseWrapper> updateTask(@RequestBody TaskDTO task) throws TicketingProjectException {
+        TaskDTO updatedTask = taskService.update(task);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully updated",updatedTask));
     }
 
 
+      //****************** Read all non complete tasks  ********************
     @GetMapping("/employee")
-    public String edit(Model model){
-
+    @Operation(summary = "Read all non complete tasks")
+    @PreAuthorize("hasAuthority('Employee')")
+    public ResponseEntity<ResponseWrapper> employeeReadAllNonCompleteTask() throws TicketingProjectException {
         List<TaskDTO> tasks = taskService.listAllTasksByStatusIsNot(Status.COMPLETE);
-        model.addAttribute("tasks",tasks);
-
-        return "task/employee-tasks";
-
+        return ResponseEntity.ok(new ResponseWrapper("Successfully read non completed current user tasks", tasks));
     }
 
-    @GetMapping("/employee/edit/{id}")
-    public String employee_update(@PathVariable("id") Long id,Model model){
+      //****************** Read employee task  ********************
+    @PutMapping ("/employee/update")
+    @Operation(summary = "Read employee task")
+    @PreAuthorize("hasAuthority('Employee')")
 
-        TaskDTO task = taskService.findByID(id);                        //populate the selected task to our form
-        List<TaskDTO> tasks = taskService.listAllTasksByStatusIsNot(Status.COMPLETE); //show all tasks which are not COMPLETED
-
-        model.addAttribute("task",task);
-        model.addAttribute("users",userService.listAllByRole("employee"));
-
-        model.addAttribute("projects",projectService.listAllNonCompletedProjects());//We dont want to see COMPLETED projects
-//        model.addAttribute("projects",projectService.listAllProjects());//We dont want to see COMPLETED projects
-
-        model.addAttribute("tasks",tasks);                                  //show in table
-        model.addAttribute("statuses",Status.values());                 //show values to select one
-
-        return "task/employee-update";
-
+    public ResponseEntity<ResponseWrapper> employeeUpdateTask(@RequestBody TaskDTO taskDTO) throws TicketingProjectException {
+        TaskDTO task = taskService.updateStatus(taskDTO);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully employee task status updated",task));
     }
-
-    @PostMapping("/employee/update/{id}")
-    public String employee_update(@PathVariable("id") Long id,TaskDTO taskDTO){
-        taskService.updateStatus(taskDTO);
-        return "redirect:/task/employee";
-    }
-
-    @GetMapping("/employee/archive")
-    public String employee_archieve(Model model){
-
-        List<TaskDTO> tasks = taskService.listAllTasksByStatus(Status.COMPLETE);
-        model.addAttribute("tasks",tasks);
-        return "task/employee-archive";
-    }
-
 
 }

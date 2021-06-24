@@ -5,32 +5,36 @@ import com.cybertek.dto.TaskDTO;
 import com.cybertek.entity.Task;
 import com.cybertek.entity.User;
 import com.cybertek.enums.Status;
+import com.cybertek.exception.TicketingProjectException;
 
 import java.util.List;
 
 public interface TaskService {
 
-    TaskDTO findByID(Long id);
+    TaskDTO findById(Long id) throws TicketingProjectException;
+
     List<TaskDTO> listAllTasks();
-    Task save (TaskDTO dto);
-    void update(TaskDTO dto);
-    void  delete(long id);
+
+    TaskDTO save(TaskDTO dto);                       //WE ALL WORK WITH DTO FOR API
+
+    TaskDTO update(TaskDTO dto) throws TicketingProjectException;
+
+    void delete(long id) throws TicketingProjectException;
 
     int totalNonCompletedTasks(String projectCode);
     int totalCompletedTasks(String projectCode);
 
-    void  deleteByProject(ProjectDTO project);
+    void deleteByProject(ProjectDTO project);
 
     List<TaskDTO> listAllByProject(ProjectDTO project);
 
-    List<TaskDTO> listAllTasksByStatusIsNot(Status status);
+    List<TaskDTO> listAllTasksByStatusIsNot(Status status) throws TicketingProjectException;
 
-    List<TaskDTO> listAllTasksByProjectManager();
+    List<TaskDTO> listAllTasksByProjectManager() throws TicketingProjectException;
 
-    void updateStatus(TaskDTO dto);
+    TaskDTO updateStatus(TaskDTO dto) throws TicketingProjectException;
 
-    List<TaskDTO> listAllTasksByStatus(Status status);
+//    List<TaskDTO> listAllTasksByStatus(Status status);
 
-    List<TaskDTO> readAllByEmployee(User user);
-
+    List<TaskDTO> readAllByEmployee(User assignedEmployee);
 }
