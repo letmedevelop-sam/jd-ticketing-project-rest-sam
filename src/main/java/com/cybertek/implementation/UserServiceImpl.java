@@ -89,6 +89,10 @@ public class UserServiceImpl implements UserService {
         //After update password is not encrypted
         convertedUser.setPassWord(passwordEncoder.encode(convertedUser.getPassWord())); //now password is encoded
 
+        if (!user.getEnabled()){
+            throw  new TicketingProjectException("User is NOT confirmed");
+        }
+
         convertedUser.setEnabled(true);
 
         //set ID to the converted object

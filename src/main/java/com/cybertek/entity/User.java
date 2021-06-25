@@ -28,7 +28,7 @@ public class User extends BaseEntity {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String passWord;
 
-    private boolean enabled;    //We did not need it while it was coming from DB
+    private Boolean enabled;    //We did not need it while it was coming from DB
     private String phone;
 
     @Enumerated(EnumType.STRING)
