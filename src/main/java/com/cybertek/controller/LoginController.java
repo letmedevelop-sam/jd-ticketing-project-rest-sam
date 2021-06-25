@@ -71,7 +71,7 @@ public class LoginController {
 /*
 //we dont want everyone has this authority
 //so we deleted "/create-user",  line from WebSecurityConfig class
-//we will cut create-user and move it to UcerController class
+//we will cut create-user and move it to UserController class
 
 	@DefaultExceptionMessage(defaultMessage = "Something went wrong, try again!")
 	@PostMapping("/create-user")
@@ -99,7 +99,7 @@ public class LoginController {
 	}
 
 /*
-//WE WIL MOVE createEmail and sendEmail to UserController  ********************
+//WE WILL MOVE createEmail and sendEmail to UserController  ********************
 //***********************************
 	private MailDTO createEmail(UserDTO userDTO) {
 
