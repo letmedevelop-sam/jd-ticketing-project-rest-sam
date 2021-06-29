@@ -2,19 +2,18 @@ package com.cybertek.aspects;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
+
 import org.hibernate.annotations.common.util.impl.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Configuration;
 
 @Aspect
 @Configuration
-@Slf4j
+@Slf4j      //when we add thia annotation we dont need to initialize the logger
 public class PerformanceAspect {
 
-  //  Logger logger = LoggerFactory.getLogger(PerformanceAspect.class);  // after adding @Slf4j we deleted
+   // Logger log = LoggerFactory.getLogger(PerformanceAspect.class);  // after adding @Slf4j we deleted
 
     @Pointcut("@annotation(com.cybertek.annotation.ExecutionTime)")
     private void anyExecutionTimeOperation(){}      //method level  // run time
