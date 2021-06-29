@@ -16,7 +16,7 @@ public class PerformanceAspect {
    // Logger log = LoggerFactory.getLogger(PerformanceAspect.class);  // after adding @Slf4j we deleted
 
     @Pointcut("@annotation(com.cybertek.annotation.ExecutionTime)")
-    private void anyExecutionTimeOperation(){}      //method level  // run time
+    private void anyExecutionTimeOperation(){}
 
     @Around("anyExecutionTimeOperation()")
     public Object anyExecutionTimeOperationAdvice(ProceedingJoinPoint proceedingJoinPoint)  {
